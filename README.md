@@ -296,6 +296,6 @@ This project is licensed under the MIT License.
 
 # Author
 
-**Aravind Pulkam**
+**Devansh upadhyay**
 
-GitHub: https://github.com/aravindpulkam3
+
