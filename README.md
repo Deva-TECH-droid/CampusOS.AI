@@ -296,6 +296,7 @@ This project is licensed under the MIT License.
 
 # Author
 
-**Devansh upadhyay**
+**Devansh Upadhyay
+  Vimarsh Srivastava**
 
 
