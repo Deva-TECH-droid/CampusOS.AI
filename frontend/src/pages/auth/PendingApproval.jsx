@@ -1,5 +1,7 @@
 import { LogOut, Clock3, XCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import useAuth from "../../hooks/useAuth.js";
+import { roleToPortal } from "../../utils/portal.js";
 
 const COPY = {
   pending: {
@@ -22,10 +24,17 @@ const COPY = {
 
 const PendingApproval = () => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const status = user?.status || "pending";
   const copy = COPY[status] || COPY.pending;
   const Icon = copy.icon;
   const message = user?.role === "faculty" ? copy.faculty : copy.student;
+
+  const handleLogout = async () => {
+    const portal = roleToPortal(user?.role);
+    await logout();
+    navigate("/login", { state: { portal } });
+  };
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-6">
@@ -36,7 +45,7 @@ const PendingApproval = () => {
         <h1 className="text-lg font-semibold text-gray-900 mb-2">{copy.title}</h1>
         <p className="text-sm text-gray-500 mb-6">{message}</p>
         <button
-          onClick={logout}
+          onClick={handleLogout}
           className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
         >
           <LogOut size={14} /> Sign out

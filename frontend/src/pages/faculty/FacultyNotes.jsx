@@ -68,6 +68,18 @@ const FacultyNotes = () => {
     );
   }
 
+  if (assignments.length === 0) {
+    return (
+      <div className="max-w-md mx-auto py-16 text-center">
+        <BookOpen size={26} className="text-gray-300 mx-auto mb-2" />
+        <p className="text-sm text-gray-500">
+          You don't have any class assignments yet. Ask an admin to assign you
+          to a classroom and subject before you can upload notes.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-2xl mx-auto space-y-5">
       <div className="flex items-center justify-between">

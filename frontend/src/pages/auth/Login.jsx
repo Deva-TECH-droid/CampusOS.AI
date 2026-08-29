@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { GraduationCap, ClipboardCheck, ShieldCheck } from "lucide-react";
 import { loginApi, logoutApi } from "../../api/auth.api.js";
 import useAuth from "../../hooks/useAuth.js";
@@ -11,7 +11,7 @@ const PORTALS = [
     icon: GraduationCap,
     matches: (role) => ["student", "classrep", "alumni"].includes(role),
     mismatchMessage: "This account isn't a Student account.",
-    landing: "/",
+    landing: "/dashboard",
   },
   {
     key: "teacher",
@@ -34,9 +34,13 @@ const PORTALS = [
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { setUser } = useAuth();
 
-  const [portal, setPortal] = useState("student");
+  // If we arrived here right after logging out of a specific portal
+  // (Profile/PendingApproval pass this along), default to that tab
+  // instead of always resetting to Student.
+  const [portal, setPortal] = useState(location.state?.portal || "student");
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);

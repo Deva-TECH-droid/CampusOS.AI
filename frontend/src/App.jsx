@@ -12,6 +12,8 @@ import TeacherSignup from "./pages/auth/TeacherSignup.jsx";
 
 // Dashboard
 import Dashboard from "./pages/dashboard/Dashboard";
+import Welcome from "./pages/Welcome.jsx";
+import RootGate from "./components/common/RootGate.jsx";
 
 // Community workspace
 import Clubs from "./pages/clubs/Clubs";
@@ -109,6 +111,8 @@ function App() {
     <BrowserRouter>
       <Routes>
         {/* Public — no layout */}
+        <Route path="/" element={<RootGate />} />
+        <Route path="/welcome" element={<Welcome />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/signup-teacher" element={<TeacherSignup />} />
@@ -122,7 +126,7 @@ function App() {
           }
         >
           {/* All nested internal routes are now automatically hidden behind login */}
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/dashboard" element={<Dashboard />} />
 
           {/* Community workspace — grouping page removed per updated spec; Clubs & Events are now top-level nav items but keep their paths to avoid breaking existing links */}
           <Route path="/community/clubs" element={<Clubs />} />

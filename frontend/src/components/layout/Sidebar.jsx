@@ -13,7 +13,7 @@ import useAuth from "../../hooks/useAuth"
 const getMainNav = (user) => [
   {
     label: "Dashboard",
-    path:  "/",
+    path:  "/dashboard",
     icon:  LayoutDashboard,
   },
   {

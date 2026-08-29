@@ -28,6 +28,7 @@ import {
 import useAuth from "../../hooks/useAuth";
 import axios from "../../api/axios";
 import { getProfile, logoutApi, updateProfile } from "../../api/auth.api";
+import { roleToPortal } from "../../utils/portal.js";
 import ImageUploadZone from "../../components/forms/ImageUploadZone.jsx";
 
 // ─── Helpers ──────────────────────────────────────────────────
@@ -589,11 +590,12 @@ const Profile = () => {
   }, []);
 
   const handleLogout = async () => {
+    const portal = roleToPortal(authUser?.role);
     try {
       await logoutApi();
     } catch (_) {}
     logout();
-    navigate("/login");
+    navigate("/login", { state: { portal } });
   };
 
   if (loading) return <Skeleton />;

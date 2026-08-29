@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Loader2, Plus, Trash2, GripVertical } from "lucide-react";
+import { Loader2, Plus, Trash2, GripVertical, FileText } from "lucide-react";
 import { getMyAssignments } from "../../api/faculty.api";
 import { createExam, submitForApproval } from "../../api/exam.api";
 
@@ -129,6 +129,18 @@ const ExamBuilder = () => {
     return (
       <div className="py-24 flex justify-center">
         <Loader2 className="animate-spin text-gray-300" size={22} />
+      </div>
+    );
+  }
+
+  if (assignments.length === 0) {
+    return (
+      <div className="max-w-md mx-auto py-16 text-center">
+        <FileText size={26} className="text-gray-300 mx-auto mb-2" />
+        <p className="text-sm text-gray-500">
+          You don't have any class assignments yet. Ask an admin to assign you
+          to a classroom and subject before you can create a test.
+        </p>
       </div>
     );
   }
