@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
-import { Loader2, UserPlus, Check, X, Clock3 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import { Loader2, UserPlus, Check, X, Clock3, School, MousePointerClick } from "lucide-react";
 import {
   adminListFaculty,
   adminListClassrooms,
@@ -15,6 +16,7 @@ const FacultyManagement = () => {
   const [classrooms, setClassrooms] = useState([]);
   const [pending, setPending] = useState([]);
   const [busyId, setBusyId] = useState(null);
+  const formRef = useRef(null);
 
   const [form, setForm] = useState({
     firstName: "",
@@ -87,6 +89,15 @@ const FacultyManagement = () => {
     }
   };
 
+  // Clicking a faculty row prefills their email into the assign form
+  // above and scrolls to it, so adding another class+subject for them
+  // doesn't mean retyping their email by hand.
+  const selectForAssignment = (f) => {
+    setForm((prev) => ({ ...prev, email: f.email, firstName: "", lastName: "", password: "" }));
+    setMessage("");
+    formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   if (loading) {
     return (
       <div className="py-24 flex justify-center">
@@ -154,71 +165,90 @@ const FacultyManagement = () => {
         </div>
       )}
 
-      <div className="bg-white border border-gray-100 rounded-xl p-4">
+      <div ref={formRef} className="bg-white border border-gray-100 rounded-xl p-4 scroll-mt-6">
         <h2 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-1.5">
           <UserPlus size={15} /> Add / assign faculty
         </h2>
-        <form onSubmit={submit} className="space-y-2.5">
-          <p className="text-[11px] text-gray-400">
-            If the email already belongs to a faculty account, this just adds a new class+subject
-            assignment to it — leave the name/password fields blank in that case.
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            <input
-              value={form.firstName}
-              onChange={(e) => setForm((f) => ({ ...f, firstName: e.target.value }))}
-              placeholder="First name"
-              className="text-sm rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-gray-300"
-            />
-            <input
-              value={form.lastName}
-              onChange={(e) => setForm((f) => ({ ...f, lastName: e.target.value }))}
-              placeholder="Last name"
-              className="text-sm rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-gray-300"
-            />
-          </div>
-          <input
-            type="email"
-            value={form.email}
-            onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-            placeholder="Email"
-            className="w-full text-sm rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-gray-300"
-          />
-          <input
-            type="password"
-            value={form.password}
-            onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-            placeholder="Password (only needed for a new account)"
-            className="w-full text-sm rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-gray-300"
-          />
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            <select
-              value={form.classroomId}
-              onChange={(e) => setForm((f) => ({ ...f, classroomId: e.target.value }))}
-              className="text-sm rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-gray-300"
+
+        {classrooms.length === 0 ? (
+          // This is the actual root cause of "the dropdown is empty" —
+          // there's nowhere to assign anyone to until a classroom exists.
+          <div className="bg-amber-50 border border-amber-100 rounded-lg p-4 text-center">
+            <School size={22} className="text-amber-500 mx-auto mb-2" />
+            <p className="text-sm text-gray-800 font-medium">No classrooms exist yet</p>
+            <p className="text-xs text-gray-500 mt-1 mb-3">
+              You need to create at least one classroom before you can assign any faculty to it.
+            </p>
+            <Link
+              to="/admin/classrooms"
+              className="inline-block text-xs font-medium text-white bg-gray-900 hover:bg-gray-800 rounded-lg px-3.5 py-2"
             >
-              {classrooms.map((c) => (
-                <option key={c._id} value={c._id}>
-                  {c.className}
-                </option>
-              ))}
-            </select>
-            <input
-              value={form.subject}
-              onChange={(e) => setForm((f) => ({ ...f, subject: e.target.value }))}
-              placeholder="Subject (must match timetable)"
-              className="text-sm rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-gray-300"
-            />
+              Go create a classroom →
+            </Link>
           </div>
-          {message && <p className="text-xs text-gray-500">{message}</p>}
-          <button
-            type="submit"
-            disabled={submitting}
-            className="px-4 py-2.5 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 disabled:opacity-60 transition-colors"
-          >
-            {submitting ? "Saving…" : "Save"}
-          </button>
-        </form>
+        ) : (
+          <form onSubmit={submit} className="space-y-2.5">
+            <p className="text-[11px] text-gray-400">
+              If the email already belongs to a faculty account, this just adds a new class+subject
+              assignment to it — leave the name/password fields blank in that case.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <input
+                value={form.firstName}
+                onChange={(e) => setForm((f) => ({ ...f, firstName: e.target.value }))}
+                placeholder="First name"
+                className="text-sm rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-gray-300"
+              />
+              <input
+                value={form.lastName}
+                onChange={(e) => setForm((f) => ({ ...f, lastName: e.target.value }))}
+                placeholder="Last name"
+                className="text-sm rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-gray-300"
+              />
+            </div>
+            <input
+              type="email"
+              value={form.email}
+              onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+              placeholder="Email"
+              className="w-full text-sm rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-gray-300"
+            />
+            <input
+              type="password"
+              value={form.password}
+              onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
+              placeholder="Password (only needed for a new account)"
+              className="w-full text-sm rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-gray-300"
+            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <select
+                value={form.classroomId}
+                onChange={(e) => setForm((f) => ({ ...f, classroomId: e.target.value }))}
+                className="text-sm rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-gray-300 bg-white"
+              >
+                {classrooms.map((c) => (
+                  <option key={c._id} value={c._id}>
+                    {c.className}
+                  </option>
+                ))}
+              </select>
+              <input
+                value={form.subject}
+                onChange={(e) => setForm((f) => ({ ...f, subject: e.target.value }))}
+                placeholder="Subject (must match timetable)"
+                className="text-sm rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-1 focus:ring-gray-300"
+              />
+            </div>
+            {message && <p className="text-xs text-gray-500">{message}</p>}
+            <button
+              type="submit"
+              disabled={submitting}
+              className="px-4 py-2.5 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 disabled:opacity-60 transition-colors"
+            >
+              {submitting ? "Saving…" : "Save"}
+            </button>
+          </form>
+        )}
       </div>
 
       <div className="bg-white border border-gray-100 rounded-xl divide-y divide-gray-50">
@@ -226,22 +256,33 @@ const FacultyManagement = () => {
           <p className="text-xs text-gray-400 p-4">No faculty accounts yet.</p>
         ) : (
           faculty.map((f) => (
-            <div key={f._id} className="px-4 py-3">
-              <p className="text-sm text-gray-900">
-                {f.firstName} {f.lastName}
-              </p>
-              <p className="text-[11px] text-gray-400 mb-1">{f.email}</p>
-              <div className="flex flex-wrap gap-1.5">
-                {(f.facultyAssignments || []).map((a, i) => (
-                  <span
-                    key={i}
-                    className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-600"
-                  >
-                    {a.classroom?.className} · {a.subject}
-                  </span>
-                ))}
+            <button
+              key={f._id}
+              onClick={() => selectForAssignment(f)}
+              className="w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors flex items-start justify-between gap-3"
+            >
+              <div className="min-w-0">
+                <p className="text-sm text-gray-900">
+                  {f.firstName} {f.lastName}
+                </p>
+                <p className="text-[11px] text-gray-400 mb-1">{f.email}</p>
+                {(f.facultyAssignments || []).length > 0 ? (
+                  <div className="flex flex-wrap gap-1.5">
+                    {f.facultyAssignments.map((a, i) => (
+                      <span
+                        key={i}
+                        className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-600"
+                      >
+                        {a.classroom?.className} · {a.subject}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <span className="text-[11px] text-amber-600">No class assigned yet — click to assign</span>
+                )}
               </div>
-            </div>
+              <MousePointerClick size={13} className="text-gray-300 flex-shrink-0 mt-1" />
+            </button>
           ))
         )}
       </div>
