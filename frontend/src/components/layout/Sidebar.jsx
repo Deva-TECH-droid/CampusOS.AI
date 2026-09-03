@@ -5,7 +5,7 @@ import {
   ShieldCheck, UserCircle, GraduationCap, School,
   Trophy, MessageSquare, BarChart2, FileText,
   ListChecks, ChevronDown, Globe, CalendarDays,
-  X, ScanFace, History, ClipboardCheck, PenSquare, Sparkles
+  X, ScanFace, History, ClipboardCheck, PenSquare, Sparkles, UserPlus2
 } from "lucide-react"
 import useAuth from "../../hooks/useAuth"
 
@@ -49,6 +49,7 @@ const getMainNav = (user) => [
           base:  "/faculty",
           children: [
             { label: "Attendance",   path: "/faculty",             icon: ClipboardCheck, exact: true },
+            { label: "Student Requests", path: "/faculty/students", icon: UserPlus2 },
             { label: "Exams",        path: "/faculty/exams",       icon: PenSquare },
             { label: "Assignments",  path: "/faculty/assignments", icon: FileText },
             { label: "Notes",        path: "/faculty/notes",       icon: BookOpen },
@@ -173,8 +174,8 @@ const Sidebar = ({ isOpen, onClose }) => {
       `}
     >
       {/* ── Logo + close (mobile) ── */}
-      <div className="flex items-center gap-3 px-4 h-16 border-b border-gray-100 overflow-hidden flex-shrink-0">
-        <div className="flex-shrink-0 w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center">
+      <div className="flex items-center gap-3 px-4 h-16 border-b border-gray-100 overflow-hidden shrink-0">
+        <div className="shrink-0 w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center">
           <GraduationCap size={16} className="text-white" />
         </div>
         {isOpen && (
@@ -185,7 +186,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             {/* Close button visible only on mobile */}
             <button
               onClick={onClose}
-              className="lg:hidden text-gray-400 hover:text-gray-700 transition-colors flex-shrink-0"
+              className="lg:hidden text-gray-400 hover:text-gray-700 transition-colors shrink-0"
             >
               <X size={16} />
             </button>
@@ -212,7 +213,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                     rel="noreferrer"
                     className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 flex-1 min-w-0 text-gray-500 hover:bg-gray-50 hover:text-gray-900"
                   >
-                    <Icon size={18} className="flex-shrink-0" />
+                    <Icon size={18} className="shrink-0" />
                     {isOpen && <span className="whitespace-nowrap truncate">{label}</span>}
                   </a>
                 ) : (
@@ -226,7 +227,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                       : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
                     }`}
                 >
-                  <Icon size={18} className="flex-shrink-0" />
+                  <Icon size={18} className="shrink-0" />
                   {isOpen && <span className="whitespace-nowrap truncate">{label}</span>}
                 </NavLink>
                 )}
@@ -235,7 +236,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                 {isOpen && children && (
                   <button
                     onClick={(e) => { e.preventDefault(); toggleDropdown(label) }}
-                    className={`p-1.5 rounded-lg transition-all duration-150 flex-shrink-0
+                    className={`p-1.5 rounded-lg transition-all duration-150 shrink-0
                       ${isActive
                         ? "text-white hover:bg-white/10"
                         : "text-gray-400 hover:text-gray-700 hover:bg-gray-100"
@@ -276,7 +277,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                           ${disabled ? "opacity-40 cursor-not-allowed pointer-events-none" : ""}
                         `}
                       >
-                        <ChildIcon size={13} className="flex-shrink-0" />
+                        <ChildIcon size={13} className="shrink-0" />
                         <span className="whitespace-nowrap">{childLabel}</span>
                       </NavLink>
                     )
@@ -289,7 +290,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       </nav>
 
       {/* ── Bottom nav ── */}
-      <div className="py-4 flex flex-col gap-0.5 px-2 border-t border-gray-100 flex-shrink-0">
+      <div className="py-4 flex flex-col gap-0.5 px-2 border-t border-gray-100 shrink-0">
         {bottomNav.map(({ label, path, icon: Icon, adminOnly }) => {
           if (adminOnly && !["superadmin", "placementCoordinator"].includes(user?.role)) return null
           return (
@@ -305,7 +306,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                 }`
               }
             >
-              <Icon size={18} className="flex-shrink-0" />
+              <Icon size={18} className="shrink-0" />
               {isOpen && <span className="whitespace-nowrap">{label}</span>}
             </NavLink>
           )

@@ -41,6 +41,7 @@ import KioskCheckIn from "./pages/attendance/KioskCheckIn.jsx";
 
 // Faculty workspace
 import FacultyAttendance from "./pages/faculty/FacultyAttendance.jsx";
+import FacultyStudentApprovals from "./pages/faculty/FacultyStudentApprovals.jsx";
 import FacultyExams from "./pages/faculty/FacultyExams.jsx";
 import ExamBuilder from "./pages/faculty/ExamBuilder.jsx";
 import ExamGrading from "./pages/faculty/ExamGrading.jsx";
@@ -76,6 +77,7 @@ import AttendanceAdmin from "./pages/admin/AttendanceAdmin.jsx";
 import FacultyManagement from "./pages/admin/FacultyManagement.jsx";
 import TestApproval from "./pages/admin/TestApproval.jsx";
 import AlumniManagement from "./pages/admin/AlumniManagement.jsx";
+import ClassroomManagement from "./pages/admin/ClassroomManagement.jsx";
 
 // Profile
 import Profile from "./pages/profile/Profile";
@@ -89,7 +91,8 @@ const adminTabs = [
   { label: "Clubs", path: "/admin", end: true },
   { label: "Drives", path: "/admin/drives", end: false },
   { label: "Moderation", path: "/admin/moderation", end: false },
-  { label: "Notices", path: "/admin/notices", end: false },
+    { label: "Notices", path: "/admin/notices", end: false },
+  { label: "Classrooms", path: "/admin/classrooms", end: false },
   { label: "Attendance", path: "/admin/attendance", end: false },
   { label: "Faculty", path: "/admin/faculty", end: false },
   { label: "Tests", path: "/admin/tests", end: false },
@@ -188,6 +191,14 @@ function App() {
             }
           />
           <Route
+            path="/faculty/students"
+            element={
+              <ProtectedRoute allowedRoles={["faculty"]}>
+                <FacultyStudentApprovals />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/faculty/exams"
             element={
               <ProtectedRoute allowedRoles={["faculty"]}>
@@ -274,7 +285,8 @@ function App() {
             <Route path="drives" element={<ManageDrives />} />
             <Route path="moderation" element={<ModerationQueue />} />
             <Route path="notices" element={<ManageClubs />} />
-            <Route path="attendance" element={<AttendanceAdmin />} />
+                       <Route path="attendance" element={<AttendanceAdmin />} />
+            <Route path="classrooms" element={<ClassroomManagement />} />
             <Route path="faculty" element={<FacultyManagement />} />
             <Route path="tests" element={<TestApproval />} />
             <Route path="alumni" element={<AlumniManagement />} />

@@ -1,13 +1,10 @@
 import { useEffect, useState } from "react";
-import { CalendarDays, Loader2, Save, CheckCircle2, Download, UserPlus2, Check, X } from "lucide-react";
+import { CalendarDays, Loader2, Save, CheckCircle2, Download } from "lucide-react";
 import {
   getMyAssignments,
   getRoster,
   markRosterAttendance,
   exportRosterAttendanceUrl,
-  listPendingStudents,
-  approveStudent,
-  rejectStudent,
 } from "../../api/faculty.api";
 
 const todayStr = () => new Date().toISOString().slice(0, 10);
@@ -21,13 +18,6 @@ const FacultyAttendance = () => {
   const [rosterLoading, setRosterLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
-  const [pendingStudents, setPendingStudents] = useState([]);
-  const [busyId, setBusyId] = useState(null);
-
-  const loadPending = async () => {
-    const { data } = await listPendingStudents();
-    setPendingStudents(data?.data?.students || []);
-  };
 
   useEffect(() => {
     getMyAssignments()
@@ -39,7 +29,6 @@ const FacultyAttendance = () => {
         }
       })
       .finally(() => setLoading(false));
-    loadPending();
   }, []);
 
   const loadRoster = async () => {
@@ -95,26 +84,6 @@ const FacultyAttendance = () => {
     }
   };
 
-  const approvePending = async (studentId) => {
-    setBusyId(studentId);
-    try {
-      await approveStudent(studentId);
-      await loadPending();
-    } finally {
-      setBusyId(null);
-    }
-  };
-
-  const rejectPending = async (studentId) => {
-    setBusyId(studentId);
-    try {
-      await rejectStudent(studentId);
-      await loadPending();
-    } finally {
-      setBusyId(null);
-    }
-  };
-
   if (loading) {
     return (
       <div className="py-24 flex justify-center">
@@ -139,47 +108,6 @@ const FacultyAttendance = () => {
 
   return (
     <div className="max-w-2xl mx-auto space-y-5">
-      {pendingStudents.length > 0 && (
-        <div className="bg-white border border-amber-100 rounded-xl p-4">
-          <h2 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-1.5">
-            <UserPlus2 size={15} className="text-amber-500" /> Pending student requests
-          </h2>
-          <div className="space-y-2">
-            {pendingStudents.map((s) => (
-              <div
-                key={s._id}
-                className="flex items-center justify-between gap-3 bg-amber-50/50 border border-amber-100 rounded-lg px-3 py-2.5"
-              >
-                <div className="min-w-0">
-                  <p className="text-sm text-gray-900">
-                    {s.firstName} {s.lastName}
-                  </p>
-                  <p className="text-[11px] text-gray-500">
-                    {s.rollNumber} · wants to join {s.pendingRequest?.subject}
-                  </p>
-                </div>
-                <div className="flex gap-1.5 flex-shrink-0">
-                  <button
-                    onClick={() => rejectPending(s._id)}
-                    disabled={busyId === s._id}
-                    className="flex items-center gap-1 text-xs font-medium text-red-600 border border-red-100 rounded-lg px-2.5 py-1.5 hover:bg-red-50 disabled:opacity-50"
-                  >
-                    <X size={12} /> Reject
-                  </button>
-                  <button
-                    onClick={() => approvePending(s._id)}
-                    disabled={busyId === s._id}
-                    className="flex items-center gap-1 text-xs font-medium text-white bg-gray-900 rounded-lg px-2.5 py-1.5 hover:bg-gray-800 disabled:opacity-50"
-                  >
-                    <Check size={12} /> Approve
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
         <div>
           <h1 className="text-lg font-semibold text-gray-900">Mark Attendance</h1>
@@ -227,7 +155,7 @@ const FacultyAttendance = () => {
             <Loader2 className="animate-spin text-gray-300" size={20} />
           </div>
         ) : (
-          <div className="max-h-[28rem] overflow-y-auto divide-y divide-gray-50">
+          <div className="max-h-112 overflow-y-auto divide-y divide-gray-50">
             {students.map((s) => (
               <button
                 key={s._id}
