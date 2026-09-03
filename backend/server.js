@@ -23,10 +23,12 @@ import examRouter from './routes/exam.routes.js';
 import alumniRouter from './routes/alumni.routes.js';
 import assignmentRouter from './routes/assignment.routes.js';
 import noteRouter from './routes/note.routes.js';
+import chatbotRouter from './routes/chatbot.routes.js';
+import internalRouter from './routes/internal.routes.js';
 dotenv.config();
-connectDB();
 
 const app = express();
+await connectDB();
 
 app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
 app.use(express.json());
@@ -53,6 +55,8 @@ app.use("/api/exams", examRouter);
 app.use("/api/alumni", alumniRouter);
 app.use("/api/assignments", assignmentRouter);
 app.use("/api/notes", noteRouter);
+app.use("/api/chatbot", chatbotRouter);  
+app.use("/api/internal/chatbot", internalRouter); 
 
 app.use(errorMiddleware);
 
