@@ -1,4 +1,4 @@
-// Usage: roleMiddleware("superadmin") or roleMiddleware("superadmin", "classRep")
+// Usage: roleMiddleware("superadmin") or roleMiddleware("superadmin", "classrep")
 const roleMiddleware = (...allowedRoles) => {
   return (req, res, next) => {
     if (!req.user) {

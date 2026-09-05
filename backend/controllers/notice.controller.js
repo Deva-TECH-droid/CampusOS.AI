@@ -16,7 +16,7 @@ const canPost = (user, targetType) => {
     case "drive":
       return ["placementCoordinator", "superadmin"].includes(user.role);
     case "classroom":
-      return ["classRep", "superadmin"].includes(user.role);
+      return ["classrep", "superadmin"].includes(user.role);
     // club + event: checked via clubAdminMiddleware on the route level
     case "clubs":
     case "events":
