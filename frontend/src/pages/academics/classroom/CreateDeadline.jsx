@@ -150,7 +150,7 @@ export default function CreateDeadline() {
       {/* Submit error */}
       {submitError && (
         <div className="flex items-start gap-2.5 px-4 py-3 bg-red-50 border border-red-200 rounded-xl mb-4">
-          <AlertTriangle size={14} className="text-red-500 mt-0.5 flex-shrink-0" />
+          <AlertTriangle size={14} className="text-red-500 mt-0.5 shrink-0" />
           <p className="text-xs text-red-700">{submitError}</p>
         </div>
       )}
@@ -240,7 +240,7 @@ export default function CreateDeadline() {
           <FieldError message={errors.dueDate} />
           {isUrgent(form.dueDate) && (
             <div className="flex items-center gap-1.5 mt-2">
-              <AlertTriangle size={12} className="text-amber-500 flex-shrink-0" />
+              <AlertTriangle size={12} className="text-amber-500 shrink-0" />
               <p className="text-xs text-amber-600">Within 48 hours — students will see an urgent flag.</p>
             </div>
           )}
@@ -278,7 +278,7 @@ export default function CreateDeadline() {
             <p className="text-xs font-medium text-gray-400 mb-3">Preview</p>
             <div className="flex items-start gap-3">
               {selectedType && (
-                <span className={`mt-0.5 text-xs font-medium px-2.5 py-1 rounded-full border flex-shrink-0 ${selectedType.color}`}>
+                <span className={`mt-0.5 text-xs font-medium px-2.5 py-1 rounded-full border shrink-0 ${selectedType.color}`}>
                   {selectedType.label}
                 </span>
               )}
