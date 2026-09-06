@@ -310,7 +310,7 @@ export const togglePin = asyncHandler(async (req, res) => {
   );
 });
 
-// ─── PATCH /api/notices/:id/archive ──────────────────────────────────────────
+// ─── PATCH /api/notices/:id/archive  (toggle) ────────────────────────────────
 export const archiveNotice = asyncHandler(async (req, res) => {
   const notice = await Notice.findById(req.params.id);
   if (!notice)
@@ -321,7 +321,32 @@ export const archiveNotice = asyncHandler(async (req, res) => {
     return res.status(403).json({ success: false, message: "Not authorised." });
   }
 
-  notice.isArchived = true;
+  notice.isArchived = !notice.isArchived;
   await notice.save();
-  sendResponse(res, 200, "Notice archived.");
+  sendResponse(
+    res,
+    200,
+    notice.isArchived ? "Notice archived." : "Notice restored.",
+    { isArchived: notice.isArchived },
+  );
+});
+
+// ─── GET /api/notices/archived ───────────────────────────────────────────────
+// Deliberately scoped by ownership, not by targetType like getNotices --
+// "archived notices" isn't a feed anyone browses by classroom/club/etc,
+// it's "notices I archived and might want back" (or, for superadmin, every
+// archived notice, since they can manage anyone's).
+export const getMyArchivedNotices = asyncHandler(async (req, res) => {
+  const query = { isArchived: true };
+  if (req.user.role !== "superadmin") {
+    query.createdBy = req.user._id;
+  }
+
+  const notices = await Notice.find(query)
+    .populate("createdBy", "firstName lastName role")
+    .sort({ updatedAt: -1 })
+    .limit(100)
+    .lean();
+
+  return sendResponse(res, 200, "Archived notices fetched.", { notices });
 });

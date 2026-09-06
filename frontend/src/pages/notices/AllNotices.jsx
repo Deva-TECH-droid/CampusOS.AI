@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Bell, Plus, Loader2, Inbox } from "lucide-react";
 import {
   getNotices,
+  getArchivedNotices,
   togglePinNotice,
   archiveNotice,
   deleteNotice,
@@ -18,6 +19,7 @@ const TABS = [
   { key: "classroom", label: "My Classroom" },
   { key: "community", label: "Community" },
   { key: "career", label: "Placements" },
+  { key: "archived", label: "Archived" },
 ];
 
 const PAGE_SIZE = 10;
@@ -51,18 +53,25 @@ const AllNotices = () => {
       append ? setLoadingMore(true) : setLoading(true);
       setError("");
       try {
-        const { data } = await getNotices(buildParams(targetPage));
-        const fetched = data?.data?.notices || [];
-        setNotices((prev) => (append ? [...prev, ...fetched] : fetched));
-        setHasMore(Boolean(data?.data?.pagination?.hasMore));
-        setPage(targetPage);
+        if (activeTab === "archived") {
+          const { data } = await getArchivedNotices();
+          setNotices(data?.data?.notices || []);
+          setHasMore(false);
+          setPage(1);
+        } else {
+          const { data } = await getNotices(buildParams(targetPage));
+          const fetched = data?.data?.notices || [];
+          setNotices((prev) => (append ? [...prev, ...fetched] : fetched));
+          setHasMore(Boolean(data?.data?.pagination?.hasMore));
+          setPage(targetPage);
+        }
       } catch {
         setError("Failed to load notices.");
       } finally {
         append ? setLoadingMore(false) : setLoading(false);
       }
     },
-    [buildParams],
+    [activeTab, buildParams],
   );
 
   useEffect(() => {
@@ -71,8 +80,8 @@ const AllNotices = () => {
 
   const handleRemove = (id) => setNotices((p) => p.filter((n) => n._id !== id));
   const handlePin = async (id) => togglePinNotice(id);
-  const handleArchive = async (id) => {
-    if (!window.confirm("Archive this notice?")) return;
+  const handleArchive = async (id, wasArchived) => {
+    if (!wasArchived && !window.confirm("Archive this notice?")) return;
     await archiveNotice(id);
     handleRemove(id);
   };

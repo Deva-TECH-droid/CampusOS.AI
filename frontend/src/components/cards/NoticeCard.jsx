@@ -5,6 +5,7 @@ import {
   ChevronDown,
   ChevronUp,
   Archive,
+  ArchiveRestore,
   Trash2,
   Megaphone,
   AlertTriangle,
@@ -104,6 +105,7 @@ const NoticeCard = ({
 }) => {
   const [open, setOpen] = useState(false);
   const [isPinned, setIsPinned] = useState(notice.isPinned);
+  const [isArchived, setIsArchived] = useState(notice.isArchived);
   const [busy, setBusy] = useState(false);
 
   const tc = typeConf[notice.noticeType] ?? typeConf.announcement;
@@ -249,11 +251,22 @@ const NoticeCard = ({
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      act(() => onArchive?.(notice._id));
+                      act(async () => {
+                        await onArchive?.(notice._id, isArchived);
+                        setIsArchived((a) => !a);
+                      });
                     }}
                     className="flex items-center gap-1 text-[10px] font-medium text-slate-400 hover:text-slate-600 transition-colors"
                   >
-                    <Archive size={10} /> Archive
+                    {isArchived ? (
+                      <>
+                        <ArchiveRestore size={10} /> Restore
+                      </>
+                    ) : (
+                      <>
+                        <Archive size={10} /> Archive
+                      </>
+                    )}
                   </button>
                   <button
                     onClick={(e) => {
@@ -412,11 +425,22 @@ const NoticeCard = ({
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    act(() => onArchive?.(notice._id));
+                    act(async () => {
+                      await onArchive?.(notice._id, isArchived);
+                      setIsArchived((a) => !a);
+                    });
                   }}
                   className="flex items-center gap-1 text-[10px] font-semibold text-slate-400 hover:text-slate-600 transition-colors"
                 >
-                  <Archive size={10} /> Archive
+                  {isArchived ? (
+                    <>
+                      <ArchiveRestore size={10} /> Restore
+                    </>
+                  ) : (
+                    <>
+                      <Archive size={10} /> Archive Notice
+                    </>
+                  )}
                 </button>
                 <button
                   onClick={(e) => {

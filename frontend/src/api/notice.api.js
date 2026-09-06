@@ -3,6 +3,7 @@ import api from "./axios.js";
 // GET /api/notices?targetType=&targetId=&page=&limit=
 // Used by every module that renders a notice feed
 export const getNotices = (params) => api.get("/notices", { params });
+export const getArchivedNotices = () => api.get("/notices/archived");
 
 export const getNoticeById  = (id)    => api.get(`/notices/${id}`);
 export const createNotice   = (data)  => api.post("/notices", data);
