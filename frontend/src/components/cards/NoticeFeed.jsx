@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, BellRing, Plus, ChevronRight } from "lucide-react";
+import { Bell, BellRing } from "lucide-react";
 import {
   getNotices,
   togglePinNotice,
@@ -103,7 +103,6 @@ const NoticeFeed = ({
   const urgentCount = notices.filter(
     (n) => n.priority === "urgent" || n.priority === "high",
   ).length;
-  const createPath = `/notices/create?category=${targetType}${targetId ? `&${targetType}=${targetId}` : ""}`;
 
   return (
     <div>

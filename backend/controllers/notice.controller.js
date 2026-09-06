@@ -1,6 +1,7 @@
 import Notice from "../models/Notice.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import sendResponse from "../utils/sendResponse.js";
+import ApiError from "../utils/apiError.js";
 import mongoose from "mongoose";
 import Drive from "../models/Drive.js";
 import Application from "../models/Application.js";
@@ -197,7 +198,8 @@ export const getNotices = asyncHandler(async (req, res) => {
   let notices = await Notice.find(query)
     .populate("createdBy", "firstName lastName role")
     .sort({ isPinned: -1, createdAt: -1 })
-    .limit(15)
+    .limit(100) // defensive cap, high enough that the priority re-sort below
+    // below runs over the real recent set, not just the first 15 inserted
     .lean();
 
   // ─── 7. DYNAMIC REF POPULATORS ────────────────────────────────
@@ -240,11 +242,22 @@ export const getNotices = asyncHandler(async (req, res) => {
     );
   });
 
-  // Keep final presentation compact and fast
-  const finalFeed = notices.slice(0, 5);
+  // Default limit of 5 preserves exact existing behavior for embedded
+  // compact/full feeds (dashboard widget, classroom page) that don't pass
+  // these params. The standalone notices page passes a real limit + page.
+  const limit = Math.min(parseInt(req.query.limit, 10) || 5, 50);
+  const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+  const start = (page - 1) * limit;
+  const finalFeed = notices.slice(start, start + limit);
 
   return sendResponse(res, 200, "Notices fetched safely.", {
     notices: finalFeed,
+    pagination: {
+      page,
+      limit,
+      total: notices.length,
+      hasMore: start + limit < notices.length,
+    },
   });
 });
 // ─── GET /api/notices/:id ─────────────────────────────────────────────────────

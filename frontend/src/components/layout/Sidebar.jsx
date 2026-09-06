@@ -5,7 +5,7 @@ import {
   ShieldCheck, UserCircle, GraduationCap, School,
   Trophy, MessageSquare, BarChart2, FileText,
   ListChecks, ChevronDown, Globe, CalendarDays,
-  X, ScanFace, History, ClipboardCheck, PenSquare, Sparkles, UserPlus2
+  X, ScanFace, History, ClipboardCheck, PenSquare, Sparkles, UserPlus2, Bell
 } from "lucide-react"
 import useAuth from "../../hooks/useAuth"
 
@@ -15,6 +15,11 @@ const getMainNav = (user) => [
     label: "Dashboard",
     path:  "/dashboard",
     icon:  LayoutDashboard,
+  },
+  {
+    label: "Notices",
+    path:  "/notices",
+    icon:  Bell,
   },
   {
     label: "Clubs",

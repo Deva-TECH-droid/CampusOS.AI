@@ -32,6 +32,7 @@ import Discussions from "./pages/discussions/Discussions.jsx";
 import CompetitivePrep from "./pages/academics/competitive/CompetitivePrep.jsx";
 import SubjectDetail from "./pages/academics/classroom/SubjectDetail.jsx";
 import NoticeForm from "./components/forms/NoticeForm.jsx";
+import AllNotices from "./pages/notices/AllNotices.jsx";
 
 // Attendance
 import MarkAttendance from "./pages/attendance/MarkAttendance.jsx";
@@ -70,7 +71,6 @@ import CreateDrive from "./pages/career/CreateDrive.jsx";
 
 // Admin workspace
 import AdminPanel from "./pages/admin/AdminPanel";
-import ManageClubs from "./pages/admin/ManageClubs";
 import ManageDrives from "./pages/admin/ManageDrives";
 import ModerationQueue from "./pages/admin/ModerationQueue";
 import AttendanceAdmin from "./pages/admin/AttendanceAdmin.jsx";
@@ -91,7 +91,7 @@ const adminTabs = [
   { label: "Clubs", path: "/admin", end: true },
   { label: "Drives", path: "/admin/drives", end: false },
   { label: "Moderation", path: "/admin/moderation", end: false },
-    { label: "Notices", path: "/admin/notices", end: false },
+    { label: "Notices", path: "/notices", end: false },
   { label: "Classrooms", path: "/admin/classrooms", end: false },
   { label: "Attendance", path: "/admin/attendance", end: false },
   { label: "Faculty", path: "/admin/faculty", end: false },
@@ -169,6 +169,18 @@ function App() {
           <Route
             path="/:targetType/:targetId/create-notice"
             element={<NoticeForm />}
+          />
+          <Route
+            path="/notices"
+            element={<AllNotices />}
+          />
+          <Route
+            path="/create-notice"
+            element={
+              <ProtectedRoute allowedRoles={["superadmin"]}>
+                <NoticeForm />
+              </ProtectedRoute>
+            }
           />
           <Route
             path="/academics/:classroomId/deadline/form/:deadlineId?"
@@ -284,7 +296,6 @@ function App() {
             <Route index element={<AdminPanel />} />
             <Route path="drives" element={<ManageDrives />} />
             <Route path="moderation" element={<ModerationQueue />} />
-            <Route path="notices" element={<ManageClubs />} />
                        <Route path="attendance" element={<AttendanceAdmin />} />
             <Route path="classrooms" element={<ClassroomManagement />} />
             <Route path="faculty" element={<FacultyManagement />} />

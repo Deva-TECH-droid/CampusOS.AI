@@ -520,8 +520,8 @@ const validateMeta = (targetType, noticeLabel, meta) => {
 };
 
 // ─── Main component ────────────────────────────────────────────────────────────
-// Route: /:targetType/:targetId/notices/create  (targetId absent for platform)
-// Called from: ClassroomPage, ClubDetail, EventDetail, DriveDetail, AdminPanel
+// Route: /:targetType/:targetId/create-notice  (targetType/targetId absent for platform, via /create-notice)
+// Called from: ClassroomPage, ClubDetail, EventDetail, DriveDetail, AllNotices (platform only)
 const CreateNotice = () => {
   const navigate = useNavigate();
   const { targetType, targetId } = useParams();
@@ -909,4 +909,3 @@ const CreateNotice = () => {
 };
 
 export default CreateNotice;
-
