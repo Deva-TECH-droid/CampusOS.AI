@@ -4,6 +4,7 @@ import roleMiddleware from "../middleware/roleMiddleware.js";
 import {
   upsertDeadline,
   getClassroom,
+  getSubjectDetail,
   getDeadlines,
   deletDeadline,
   adminListAllClassrooms,
@@ -15,6 +16,7 @@ import {
 const classRoomRouter = express.Router();
 
 classRoomRouter.get("/", authMiddleware, getClassroom);
+classRoomRouter.get("/subject/:name", authMiddleware, getSubjectDetail);
 classRoomRouter.post("/:classroomId/deadline/save/:deadlineId?", authMiddleware, upsertDeadline);
 classRoomRouter.get("/:id/deadlines", authMiddleware, getDeadlines);
 classRoomRouter.delete("/:classroomId/deadline/delete/:deadlineId", authMiddleware, deletDeadline);

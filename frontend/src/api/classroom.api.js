@@ -1,6 +1,8 @@
 import api from "./axios";
 
 export const getClassroom = () => api.get("/classroom");
+export const getSubjectDetail = (name) =>
+  api.get(`/classroom/subject/${encodeURIComponent(name)}`);
 export const saveDeadline = (classroomId, deadlineId = "", data) =>
   api.post(`/classroom/${classroomId}/deadline/save/${deadlineId}`, data);
 export const getDeadlines = (id) => api.get(`classroom/${id}/deadlines`);
