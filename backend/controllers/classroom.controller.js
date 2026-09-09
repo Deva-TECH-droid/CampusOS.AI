@@ -2,6 +2,7 @@
 
 import Classroom from "../models/Classroom.js";
 import Deadline from "../models/Deadline.js";
+import Note from "../models/Note.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import sendResponse from "../utils/sendResponse.js";
 
@@ -29,6 +30,67 @@ export const getClassroom = asyncHandler(async (req, res) => {
   return sendResponse(res, 200, "Classroom fetched successfully", {
     classroom,
     isClassRep, // Returns clean explicitly typed true/false boolean primitive
+  });
+});
+
+// ─── GET /api/classroom/subject/:name ────────────────────────────────────
+// Scoped to req.user.classroom, not an explicit classroomId -- the only
+// link to this page (Classroom.jsx) passes just the subject name, matching
+// the "my classroom" pattern already used by getClassroom/getMyAssignments.
+//
+// `faculty` and `resources` are real, derived from existing data:
+//   - faculty: scanned out of this classroom's own timetable periods
+//   - resources: Notes already uploaded by faculty for this subject/classroom
+// syllabus/importantTopics/referenceBooks are intentionally omitted -- no
+// model stores that data yet, and the frontend already renders those
+// sections conditionally, so leaving them undefined is the correct,
+// honest state rather than faking placeholder content.
+export const getSubjectDetail = asyncHandler(async (req, res) => {
+  const subjectName = req.params.name;
+
+  if (!req.user.classroom) {
+    return sendResponse(res, 200, "No classroom assigned.", {
+      faculty: null,
+      resources: [],
+    });
+  }
+
+  const classroom = await Classroom.findById(req.user.classroom).lean();
+  if (!classroom) {
+    throw new ApiError(404, "Classroom context not found.");
+  }
+
+  const normalize = (s) => (s || "").trim().toLowerCase();
+  const targetName = normalize(subjectName);
+
+  const facultyNames = new Set();
+  Object.values(classroom.timetable || {}).forEach((periods) => {
+    (periods || []).forEach((period) => {
+      if (normalize(period.subject) === targetName && period.faculty) {
+        facultyNames.add(period.faculty);
+      }
+    });
+  });
+
+  const notes = await Note.find({ classroom: req.user.classroom })
+    .populate("faculty", "firstName lastName")
+    .sort({ createdAt: -1 })
+    .lean();
+
+  const resources = notes
+    .filter((n) => normalize(n.subject) === targetName)
+    .map((n) => ({
+      title: n.title,
+      url: n.fileUrl,
+      type: "other",
+      platform: n.faculty
+        ? `Uploaded by ${n.faculty.firstName} ${n.faculty.lastName}`
+        : undefined,
+    }));
+
+  return sendResponse(res, 200, "Subject detail fetched.", {
+    faculty: facultyNames.size > 0 ? [...facultyNames].join(", ") : null,
+    resources,
   });
 });
 

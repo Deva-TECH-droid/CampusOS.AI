@@ -1,10 +1,11 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 // Lucide icons via react-icons
 import { 
   LuArrowLeft, LuExternalLink, LuBookOpen, LuUser, LuFileText, LuMap, LuVideo 
 } from "react-icons/lu"
 import useAuth from "../../../hooks/useAuth"
+import { getSubjectDetail } from "../../../api/classroom.api"
 
 // ─── API calls ────────────────────────────────────────────────
 // GET /api/classroom/subject/:name?branch=&semester= → subject detail with resources
@@ -32,9 +33,32 @@ const SubjectDetail = () => {
   const navigate = useNavigate()
   const subject = decodeURIComponent(name)
 
-  // TODO: fetch subject detail from API
-  // GET /api/classroom/subject/:name → { faculty, resources, syllabus, importantTopics, referenceBooks }
-  const data = null
+  // GET /api/classroom/subject/:name → { faculty, resources }
+  // (syllabus/importantTopics/referenceBooks intentionally not returned yet --
+  // no backend model stores that data; the sections below already render
+  // conditionally and simply won't appear until that's built)
+  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
+
+  useEffect(() => {
+    let active = true
+    setLoading(true)
+    setError(false)
+    getSubjectDetail(subject)
+      .then((res) => {
+        if (active) setData(res.data?.data || null)
+      })
+      .catch(() => {
+        if (active) setError(true)
+      })
+      .finally(() => {
+        if (active) setLoading(false)
+      })
+    return () => {
+      active = false
+    }
+  }, [subject])
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -45,6 +69,13 @@ const SubjectDetail = () => {
         <LuArrowLeft size={14} /> Back
       </button>
 
+      {loading ? (
+        <div className="space-y-4 animate-pulse">
+          <div className="bg-white border border-gray-100 rounded-xl p-5 h-16" />
+          <div className="bg-white border border-gray-100 rounded-xl p-5 h-24" />
+        </div>
+      ) : (
+      <>
       {/* Header */}
       <div className="bg-white border border-gray-100 rounded-xl p-5 mb-4">
         <div className="flex items-start justify-between">
@@ -130,13 +161,15 @@ const SubjectDetail = () => {
         </div>
       )}
 
-      {/* Placeholder when no data */}
-      {!data && (
+      {/* Fetch error */}
+      {error && (
         <div className="bg-white border border-gray-100 rounded-xl p-8 text-center">
           <p className="text-xs text-gray-400">
-            Subject details will appear here once connected to the backend.
+            Couldn't load subject details. Try again shortly.
           </p>
         </div>
+      )}
+      </>
       )}
     </div>
   )
