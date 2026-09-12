@@ -20,6 +20,7 @@ import {
   adminGetLogs,
   adminMarkManual,
 } from "../../api/attendance.api";
+import { adminListFacultyAttendance } from "../../api/faculty.api";
 
 const SAMPLES_NEEDED = 5;
 
@@ -126,6 +127,31 @@ const AttendanceAdmin = () => {
   const [search, setSearch] = useState("");
   const [enrollTarget, setEnrollTarget] = useState(null);
 
+  // Tab switch: "students" or "faculty" (Req 9 & 11)
+  const [activeTab, setActiveTab] = useState("students");
+  const [facultyLogs, setFacultyLogs] = useState([]);
+  const [facultyDate, setFacultyDate] = useState("");
+  const [loadingFaculty, setLoadingFaculty] = useState(false);
+
+  const loadFacultyAttendance = async (dateVal = "") => {
+    setLoadingFaculty(true);
+    try {
+      const { data } = await adminListFacultyAttendance(dateVal);
+      setFacultyLogs(data?.data?.records || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingFaculty(false);
+    }
+  };
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    if (tab === "faculty" && facultyLogs.length === 0) {
+      loadFacultyAttendance(facultyDate);
+    }
+  };
+
   const [manualForm, setManualForm] = useState({
     studentId: "",
     subject: "",
@@ -208,8 +234,125 @@ const AttendanceAdmin = () => {
         />
       </div>
 
-      {/* Roster + enrollment */}
-      <div className="bg-white border border-gray-100 rounded-xl">
+      {/* Attendance Mode Tabs (Req 9 & 11) */}
+      <div className="flex bg-gray-100 p-1 rounded-xl w-fit">
+        <button
+          onClick={() => handleTabChange("students")}
+          className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all ${
+            activeTab === "students"
+              ? "bg-white text-gray-900 shadow-sm"
+              : "text-gray-500 hover:text-gray-900"
+          }`}
+        >
+          Student Attendance & Roster
+        </button>
+        <button
+          onClick={() => handleTabChange("faculty")}
+          className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all ${
+            activeTab === "faculty"
+              ? "bg-white text-gray-900 shadow-sm"
+              : "text-gray-500 hover:text-gray-900"
+          }`}
+        >
+          Faculty Attendance (Face Verification)
+        </button>
+      </div>
+
+      {activeTab === "faculty" ? (
+        /* Faculty Attendance Table View (Req 9) */
+        <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-50 pb-3">
+            <div>
+              <h2 className="text-sm font-bold text-gray-900">
+                Faculty Attendance Records
+              </h2>
+              <p className="text-xs text-gray-400">
+                Verified teacher face scan check-ins recorded for each campus day
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <input
+                type="date"
+                value={facultyDate}
+                onChange={(e) => {
+                  setFacultyDate(e.target.value);
+                  loadFacultyAttendance(e.target.value);
+                }}
+                className="text-xs rounded-lg border border-gray-200 px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-gray-900 bg-white"
+              />
+              <button
+                onClick={() => loadFacultyAttendance(facultyDate)}
+                className="text-xs px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors font-medium"
+              >
+                Filter
+              </button>
+            </div>
+          </div>
+
+          {loadingFaculty ? (
+            <div className="py-16 flex justify-center">
+              <Loader2 size={20} className="animate-spin text-gray-400" />
+            </div>
+          ) : facultyLogs.length === 0 ? (
+            <div className="py-12 text-center text-xs text-gray-400">
+              No faculty attendance records found for this date.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs text-left">
+                <thead className="bg-gray-50/75 text-gray-500 border-b border-gray-100 font-semibold uppercase text-[10px] tracking-wider">
+                  <tr>
+                    <th className="px-4 py-3">Teacher</th>
+                    <th className="px-4 py-3">Department</th>
+                    <th className="px-4 py-3">Date</th>
+                    <th className="px-4 py-3">Time</th>
+                    <th className="px-4 py-3">Status</th>
+                    <th className="px-4 py-3">Method</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {facultyLogs.map((log) => (
+                    <tr key={log._id} className="hover:bg-gray-50/50 transition-colors">
+                      <td className="px-4 py-3 font-semibold text-gray-900">
+                        {log.facultyName}
+                        {log.faculty?.email && (
+                          <span className="block text-[10px] font-normal text-gray-400">
+                            {log.faculty.email}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-gray-600">
+                        {log.department || log.faculty?.department || "Faculty"}
+                      </td>
+                      <td className="px-4 py-3 text-gray-600">
+                        {new Date(log.date).toLocaleDateString("en-IN", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                        })}
+                      </td>
+                      <td className="px-4 py-3 font-medium text-gray-900">{log.time}</td>
+                      <td className="px-4 py-3">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          <CheckCircle2 size={11} />
+                          {log.status || "Present"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-gray-500 capitalize">
+                        {log.method === "face" ? "Face Recognition" : "Manual"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      ) : (
+        <>
+          {/* Roster + enrollment */}
+          <div className="bg-white border border-gray-100 rounded-xl">
         <div className="flex items-center justify-between p-4 border-b border-gray-50">
           <h2 className="text-sm font-semibold text-gray-900">
             Students &amp; face enrollment
@@ -353,6 +496,8 @@ const AttendanceAdmin = () => {
           </form>
         </div>
       </div>
+      </>
+      )}
 
       {enrollTarget && (
         <EnrollModal

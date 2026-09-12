@@ -5,7 +5,7 @@ import {
   ShieldCheck, UserCircle, GraduationCap, School,
   Trophy, MessageSquare, BarChart2, FileText,
   ListChecks, ChevronDown, Globe, CalendarDays,
-  X, ScanFace, History, ClipboardCheck, PenSquare, Sparkles, UserPlus2, Bell
+  X, ScanFace, History, ClipboardCheck, PenSquare, Sparkles, UserPlus2, Bell, Clock
 } from "lucide-react"
 import useAuth from "../../hooks/useAuth"
 
@@ -53,11 +53,12 @@ const getMainNav = (user) => [
           icon:  ClipboardCheck,
           base:  "/faculty",
           children: [
-            { label: "Attendance",   path: "/faculty",             icon: ClipboardCheck, exact: true },
-            { label: "Student Requests", path: "/faculty/students", icon: UserPlus2 },
-            { label: "Exams",        path: "/faculty/exams",       icon: PenSquare },
-            { label: "Assignments",  path: "/faculty/assignments", icon: FileText },
-            { label: "Notes",        path: "/faculty/notes",       icon: BookOpen },
+            { label: "Attendance",      path: "/faculty",             icon: ClipboardCheck, exact: true },
+            { label: "Student Requests",path: "/faculty/students",    icon: UserPlus2 },
+            { label: "Timetable",       path: "/faculty/timetable",   icon: Clock },
+            { label: "Exams",           path: "/faculty/exams",       icon: PenSquare },
+            { label: "Assignments",     path: "/faculty/assignments",  icon: FileText },
+            { label: "Notes",           path: "/faculty/notes",        icon: BookOpen },
           ],
         },
       ]

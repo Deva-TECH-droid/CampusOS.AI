@@ -25,6 +25,7 @@ import assignmentRouter from './routes/assignment.routes.js';
 import noteRouter from './routes/note.routes.js';
 import chatbotRouter from './routes/chatbot.routes.js';
 import internalRouter from './routes/internal.routes.js';
+import feedbackRouter from './routes/feedback.routes.js';
 dotenv.config();
 
 const app = express();
@@ -57,6 +58,7 @@ app.use("/api/assignments", assignmentRouter);
 app.use("/api/notes", noteRouter);
 app.use("/api/chatbot", chatbotRouter);  
 app.use("/api/internal/chatbot", internalRouter); 
+app.use("/api/feedback", feedbackRouter); 
 
 app.use(errorMiddleware);
 

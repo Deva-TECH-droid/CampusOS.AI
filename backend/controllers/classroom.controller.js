@@ -3,6 +3,7 @@
 import Classroom from "../models/Classroom.js";
 import Deadline from "../models/Deadline.js";
 import Note from "../models/Note.js";
+import User from "../models/User.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import sendResponse from "../utils/sendResponse.js";
 
@@ -231,3 +232,59 @@ export const adminRemovePeriod = asyncHandler(async (req, res) => {
 
   return sendResponse(res, 200, "Period removed.", { classroom });
 });
+
+// ── PUT /api/classroom/admin/:id ──────────────────────────────────────
+export const adminUpdateClassroom = asyncHandler(async (req, res) => {
+  const { className, branch, year, section } = req.body;
+  const classroom = await Classroom.findById(req.params.id);
+  if (!classroom) throw new ApiError(404, "Classroom not found.");
+
+  if (className) classroom.className = className;
+  if (branch) classroom.branch = branch;
+  if (year) classroom.year = Number(year);
+  if (section !== undefined) classroom.section = section;
+
+  await classroom.save();
+  return sendResponse(res, 200, "Classroom updated.", { classroom });
+});
+
+// ── GET /api/classroom/admin/:id/students ─────────────────────────────
+export const adminGetClassroomStudents = asyncHandler(async (req, res) => {
+  const classroom = await Classroom.findById(req.params.id).lean();
+  if (!classroom) throw new ApiError(404, "Classroom not found.");
+
+  const students = await User.find({ _id: { $in: classroom.students || [] } })
+    .select("firstName lastName rollNumber email branch department year section")
+    .sort({ rollNumber: 1 })
+    .lean();
+
+  return sendResponse(res, 200, "Enrolled students fetched.", {
+    classroom: {
+      _id: classroom._id,
+      className: classroom.className,
+      branch: classroom.branch,
+    },
+    students,
+  });
+});
+
+// ── PUT /api/classroom/admin/:id/periods/:day/:index ──────────────────
+export const adminUpdatePeriod = asyncHandler(async (req, res) => {
+  const { id, day, index } = req.params;
+  const { subject, faculty, room, startTime, endTime } = req.body;
+
+  const classroom = await Classroom.findById(id);
+  if (!classroom) throw new ApiError(404, "Classroom not found.");
+
+  const periods = classroom.timetable[day];
+  if (!periods || !periods[index]) throw new ApiError(404, "Period not found.");
+
+  if (subject) periods[index].subject = subject;
+  if (faculty) periods[index].faculty = faculty;
+  if (room !== undefined) periods[index].room = room;
+  if (startTime) periods[index].startTime = startTime;
+  if (endTime) periods[index].endTime = endTime;
+
+  await classroom.save();
+  return sendResponse(res, 200, "Period updated.", { classroom });
+});

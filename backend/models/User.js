@@ -94,6 +94,16 @@ const userSchema = new mongoose.Schema(
       faculty: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
       subject: { type: String, default: null },
     },
+    // Multi-subject requests for students during registration
+    studentRequests: [
+      {
+        faculty: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        subject: { type: String },
+        classroom: { type: mongoose.Schema.Types.ObjectId, ref: "Classroom" },
+        status: { type: String, enum: ["pending", "approved", "rejected"], default: "pending" },
+        requestedAt: { type: Date, default: Date.now },
+      },
+    ],
     // Only meaningful when role === "alumni"
     alumniProfile: {
       graduationYear: { type: Number },

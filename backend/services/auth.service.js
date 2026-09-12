@@ -41,7 +41,27 @@ export const registerUser = async (userData) => {
   // approveStudent). If they didn't pick a teacher, they still land as
   // pending; an admin can sort them out from the Faculty/Attendance panel.
   let pendingRequest = { faculty: null, subject: null };
-  if (requestedFacultyId && requestedSubject) {
+  const studentRequests = [];
+
+  if (Array.isArray(userData.selectedEnrollments) && userData.selectedEnrollments.length > 0) {
+    for (const item of userData.selectedEnrollments) {
+      if (item.facultyId && item.subject) {
+        studentRequests.push({
+          faculty: item.facultyId,
+          subject: item.subject,
+          classroom: item.classroomId || null,
+          status: "pending",
+          requestedAt: new Date(),
+        });
+      }
+    }
+    if (studentRequests.length > 0) {
+      pendingRequest = {
+        faculty: studentRequests[0].faculty,
+        subject: studentRequests[0].subject,
+      };
+    }
+  } else if (requestedFacultyId && requestedSubject) {
     const faculty = await User.findOne({
       _id: requestedFacultyId,
       role: "faculty",
@@ -53,14 +73,22 @@ export const registerUser = async (userData) => {
       throw error;
     }
     pendingRequest = { faculty: faculty._id, subject: requestedSubject };
+    studentRequests.push({
+      faculty: faculty._id,
+      subject: requestedSubject,
+      status: "pending",
+      requestedAt: new Date(),
+    });
   }
 
   const user = await User.create({
     firstName, lastName, email, password,
     branch, year, section, rollNumber,
+    department: userData.department || branch,
     cgpa: cgpa || 0,
     status: "pending",
     pendingRequest,
+    studentRequests,
   });
 
   return user;

@@ -2,9 +2,11 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { signupApi, getTeachersDirectoryApi } from "../../api/auth.api.js";
 import { BRANCHES } from "../../constants/branches.js";
+import { DEPARTMENT_SUBJECTS } from "../../constants/departmentSubjects.js";
+import { BookOpen, User, Clock, CheckSquare, Square, School } from "lucide-react";
 
 const YEARS = [1, 2, 3, 4];
-const SECTIONS = ["A", "B"];
+const SECTIONS = ["A", "B", "C", "D"];
 
 const INITIAL_FORM = {
   firstName: "",
@@ -17,9 +19,7 @@ const INITIAL_FORM = {
   section: "",
   rollNumber: "",
   cgpa: "",
-  requestedTeacher: "", // "facultyId::subject"
 };
-
 
 const Field = ({ name, label, type = "text", placeholder, value, onChange, error, children }) => (
   <div>
@@ -57,6 +57,10 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const [teachers, setTeachers] = useState([]);
 
+  // Multi-subject & teacher selection state (Req 6)
+  const [selectedSubjects, setSelectedSubjects] = useState([]);
+  const [subjectTeacherMap, setSubjectTeacherMap] = useState({}); // { [subject]: { facultyId, subject, classroomId, className, facultyName, time } }
+
   useEffect(() => {
     getTeachersDirectoryApi()
       .then(({ data }) => setTeachers(data?.data?.directory || []))
@@ -68,6 +72,42 @@ export default function Signup() {
     setForm((prev) => ({ ...prev, [name]: value }));
     setFieldErrors((prev) => ({ ...prev, [name]: "" }));
     setError("");
+
+    // If department/branch changes, reset selected subjects
+    if (name === "branch") {
+      setSelectedSubjects([]);
+      setSubjectTeacherMap({});
+    }
+  };
+
+  const handleToggleSubject = (sub) => {
+    if (selectedSubjects.includes(sub)) {
+      setSelectedSubjects((prev) => prev.filter((s) => s !== sub));
+      setSubjectTeacherMap((prev) => {
+        const next = { ...prev };
+        delete next[sub];
+        return next;
+      });
+    } else {
+      setSelectedSubjects((prev) => [...prev, sub]);
+      // Auto-select first available teacher if any matches
+      const available = teachers.filter((t) =>
+        t.subject?.toLowerCase() === sub.toLowerCase()
+      );
+      if (available.length > 0) {
+        setSubjectTeacherMap((prev) => ({
+          ...prev,
+          [sub]: available[0],
+        }));
+      }
+    }
+  };
+
+  const handleSelectTeacherForSubject = (sub, teacherObj) => {
+    setSubjectTeacherMap((prev) => ({
+      ...prev,
+      [sub]: teacherObj,
+    }));
   };
 
   const validate = () => {
@@ -99,21 +139,27 @@ export default function Signup() {
     setLoading(true);
     setError("");
 
-    const { confirmPassword, requestedTeacher, ...payload } = form;
+    const { confirmPassword, ...payload } = form;
     if (!payload.cgpa) delete payload.cgpa;
 
-    let requestedFacultyId, requestedSubject;
-    if (requestedTeacher) {
-      [requestedFacultyId, requestedSubject] = requestedTeacher.split("::");
-    }
+    // Build selectedEnrollments array
+    const selectedEnrollments = Object.values(subjectTeacherMap).map((t) => ({
+      facultyId: t.facultyId,
+      subject: t.subject,
+      classroomId: t.classroomId,
+    }));
+
+    // Legacy fallback parameters for first selection
+    const firstTeacher = selectedEnrollments[0];
 
     try {
       await signupApi({
         ...payload,
         year: Number(payload.year),
         cgpa: payload.cgpa ? Number(payload.cgpa) : 0,
-        requestedFacultyId,
-        requestedSubject,
+        selectedEnrollments,
+        requestedFacultyId: firstTeacher?.facultyId,
+        requestedSubject: firstTeacher?.subject,
       });
       navigate("/login", { state: { registered: true } });
     } catch (err) {
@@ -123,51 +169,58 @@ export default function Signup() {
     }
   };
 
+  const availableSubjectsForBranch = form.branch
+    ? DEPARTMENT_SUBJECTS[form.branch] || [
+        "Java",
+        "Web Development",
+        "Data Structures",
+        "Database Management",
+        "Operating Systems",
+      ]
+    : [];
+
   return (
     <div className="min-h-screen bg-white flex">
-      {/* Left panel */}
+      {/* Left panel branding */}
       <div className="hidden lg:flex lg:w-[420px] shrink-0 bg-gray-950 flex-col justify-between p-14">
         <div>
-          <span className="text-white text-xl font-semibold tracking-tight">EventSphere</span>
+          <span className="text-white text-xl font-semibold tracking-tight">CampusOS.AI</span>
         </div>
         <div>
           <h1 className="text-white text-4xl font-light leading-tight mb-6">
             Join your<br />
-            <span className="font-semibold">campus network.</span>
+            <span className="font-semibold">smart campus network.</span>
           </h1>
           <p className="text-gray-400 text-sm leading-relaxed max-w-xs">
-            Create your account to access events, placements, academic resources, and everything in between.
+            Dynamic course enrollment, face recognition attendance, timetable scheduling, and campus assistance.
           </p>
         </div>
-        <p className="text-gray-600 text-xs">© {new Date().getFullYear()} EventSphere</p>
+        <p className="text-xs text-gray-500">CampusOS Intelligent Management System</p>
       </div>
 
-      {/* Right panel */}
-      <div className="flex-1 flex items-start justify-center px-6 py-12 overflow-y-auto">
-        <div className="w-full max-w-lg">
-          {/* Mobile logo */}
-          <div className="lg:hidden mb-10">
-            <span className="text-gray-900 text-xl font-semibold tracking-tight">EventSphere</span>
-          </div>
-
-          <div className="mb-8">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-1">Create account</h2>
-            <p className="text-sm text-gray-500">Fill in your details to get started.</p>
+      {/* Right form panel */}
+      <div className="flex-1 flex items-center justify-center p-6 sm:p-12 overflow-y-auto">
+        <div className="w-full max-w-lg space-y-6">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Create Student Account</h2>
+            <p className="text-xs text-gray-500 mt-1">
+              Select your department and subjects to submit class enrollment requests to faculty
+            </p>
           </div>
 
           {error && (
-            <div className="mb-5 px-4 py-3 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-700">{error}</p>
+            <div className="p-3.5 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700">
+              {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Name row */}
-            <div className="grid grid-cols-2 gap-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Name */}
+            <div className="grid grid-cols-2 gap-3">
               <Field
                 name="firstName"
                 label="First name"
-                placeholder="Arjun"
+                placeholder="Raj"
                 value={form.firstName}
                 onChange={handleChange}
                 error={fieldErrors.firstName}
@@ -182,175 +235,253 @@ export default function Signup() {
               />
             </div>
 
+            {/* Email */}
             <Field
               name="email"
-              label="Email address"
+              label="Campus Email"
               type="email"
-              placeholder="you@college.edu"
+              placeholder="raj@college.edu"
               value={form.email}
               onChange={handleChange}
               error={fieldErrors.email}
             />
 
-            {/* Password row */}
-            <div className="grid grid-cols-2 gap-4">
+            {/* Passwords */}
+            <div className="grid grid-cols-2 gap-3">
               <Field
                 name="password"
                 label="Password"
                 type="password"
-                placeholder="Min. 8 characters"
+                placeholder="••••••••"
                 value={form.password}
                 onChange={handleChange}
                 error={fieldErrors.password}
               />
               <Field
                 name="confirmPassword"
-                label="Confirm password"
+                label="Confirm Password"
                 type="password"
-                placeholder="Repeat password"
+                placeholder="••••••••"
                 value={form.confirmPassword}
                 onChange={handleChange}
                 error={fieldErrors.confirmPassword}
               />
             </div>
 
+            {/* Department (Branch) Selection */}
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1.5">
+                Department / Branch *
+              </label>
+              <select
+                name="branch"
+                value={form.branch}
+                onChange={handleChange}
+                className={selectClass(fieldErrors.branch)}
+              >
+                <option value="">Select your department</option>
+                {BRANCHES.map((b) => (
+                  <option key={b} value={b}>
+                    {b}
+                  </option>
+                ))}
+              </select>
+              {fieldErrors.branch && (
+                <p className="mt-1 text-xs text-red-600">{fieldErrors.branch}</p>
+              )}
+            </div>
+
             {/* Academic details */}
-            <div className="pt-1">
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">
-                Academic Details
-              </p>
-              <div className="space-y-5">
-                <Field
-                  name="rollNumber"
-                  label="Roll number"
-                  placeholder="22CS001"
-                  value={form.rollNumber}
+            <div className="grid grid-cols-4 gap-2.5">
+              <Field
+                name="rollNumber"
+                label="Roll No."
+                placeholder="CS-101"
+                value={form.rollNumber}
+                onChange={handleChange}
+                error={fieldErrors.rollNumber}
+              />
+
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1.5">Year</label>
+                <select
+                  name="year"
+                  value={form.year}
                   onChange={handleChange}
-                  error={fieldErrors.rollNumber}
-                />
+                  className={selectClass(fieldErrors.year)}
+                >
+                  <option value="">Year</option>
+                  {YEARS.map((y) => (
+                    <option key={y} value={y}>{y}</option>
+                  ))}
+                </select>
+                {fieldErrors.year && <p className="mt-1 text-xs text-red-600">{fieldErrors.year}</p>}
+              </div>
 
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1.5">Section</label>
+                <select
+                  name="section"
+                  value={form.section}
+                  onChange={handleChange}
+                  className={selectClass(fieldErrors.section)}
+                >
+                  <option value="">Sec.</option>
+                  {SECTIONS.map((s) => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+                {fieldErrors.section && <p className="mt-1 text-xs text-red-600">{fieldErrors.section}</p>}
+              </div>
+
+              <Field
+                name="cgpa"
+                label="CGPA"
+                type="number"
+                placeholder="8.5"
+                value={form.cgpa}
+                onChange={handleChange}
+                error={fieldErrors.cgpa}
+              />
+            </div>
+
+            {/* Dynamic Subjects Selection (Requirement 6) */}
+            {form.branch && (
+              <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 space-y-3">
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1.5">Branch</label>
-                  <select
-                    name="branch"
-                    value={form.branch}
-                    onChange={handleChange}
-                    className={selectClass(fieldErrors.branch)}
-                  >
-                    <option value="">Select branch</option>
-                    {BRANCHES.map((b) => (
-                      <option key={b} value={b}>{b}</option>
-                    ))}
-                  </select>
-                  {fieldErrors.branch && (
-                    <p className="mt-1 text-xs text-red-600">{fieldErrors.branch}</p>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1.5">Year</label>
-                    <select
-                      name="year"
-                      value={form.year}
-                      onChange={handleChange}
-                      className={selectClass(fieldErrors.year)}
-                    >
-                      <option value="">Year</option>
-                      {YEARS.map((y) => (
-                        <option key={y} value={y}>{y}</option>
-                      ))}
-                    </select>
-                    {fieldErrors.year && (
-                      <p className="mt-1 text-xs text-red-600">{fieldErrors.year}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1.5">Section</label>
-                    <select
-                      name="section"
-                      value={form.section}
-                      onChange={handleChange}
-                      className={selectClass(fieldErrors.section)}
-                    >
-                      <option value="">Sec.</option>
-                      {SECTIONS.map((s) => (
-                        <option key={s} value={s}>{s}</option>
-                      ))}
-                    </select>
-                    {fieldErrors.section && (
-                      <p className="mt-1 text-xs text-red-600">{fieldErrors.section}</p>
-                    )}
-                  </div>
-
-                  <Field
-                    name="cgpa"
-                    label="CGPA"
-                    type="number"
-                    placeholder="8.5"
-                    value={form.cgpa}
-                    onChange={handleChange}
-                    error={fieldErrors.cgpa}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1.5">
-                    Teacher to request (optional)
-                  </label>
-                  <select
-                    name="requestedTeacher"
-                    value={form.requestedTeacher}
-                    onChange={handleChange}
-                    className={selectClass()}
-                  >
-                    <option value="">I'll ask a teacher to add me later</option>
-                    {teachers.map((t) => (
-                      <option
-                        key={`${t.facultyId}::${t.subject}`}
-                        value={`${t.facultyId}::${t.subject}`}
-                      >
-                        {t.facultyName} — {t.subject} ({t.className})
-                      </option>
-                    ))}
-                  </select>
-                  <p className="mt-1.5 text-xs text-gray-400">
-                    Your account needs a teacher's approval before you can access classes,
-                    attendance, or coursework — picking one here sends them your request directly.
+                  <h4 className="text-xs font-bold text-gray-900 flex items-center gap-1.5">
+                    <BookOpen size={14} className="text-indigo-600" />
+                    Available Subjects in {form.branch}
+                  </h4>
+                  <p className="text-[11px] text-gray-500">
+                    Select the subjects you want to enroll in this semester:
                   </p>
                 </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {availableSubjectsForBranch.map((sub) => {
+                    const isChecked = selectedSubjects.includes(sub);
+                    return (
+                      <button
+                        key={sub}
+                        type="button"
+                        onClick={() => handleToggleSubject(sub)}
+                        className={`flex items-center gap-2 p-2.5 rounded-xl border text-left transition-all text-xs font-medium ${
+                          isChecked
+                            ? "bg-white border-gray-900 text-gray-900 shadow-xs"
+                            : "bg-white/60 border-gray-200 text-gray-600 hover:bg-white"
+                        }`}
+                      >
+                        {isChecked ? (
+                          <CheckSquare size={16} className="text-gray-900 shrink-0" />
+                        ) : (
+                          <Square size={16} className="text-gray-400 shrink-0" />
+                        )}
+                        <span>{sub}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Teacher / Class Selection for each checked subject */}
+                {selectedSubjects.length > 0 && (
+                  <div className="pt-2 border-t border-gray-200 space-y-3">
+                    <p className="text-xs font-bold text-gray-800">
+                      Select preferred Teacher & Class timing:
+                    </p>
+
+                    {selectedSubjects.map((sub) => {
+                      const matchingTeachers = teachers.filter((t) =>
+                        t.subject?.toLowerCase().includes(sub.toLowerCase())
+                      );
+
+                      return (
+                        <div
+                          key={sub}
+                          className="bg-white border border-gray-200 rounded-xl p-3 space-y-2 shadow-xs"
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-indigo-950 flex items-center gap-1.5">
+                              <span className="w-1.5 h-1.5 rounded-full bg-indigo-600" />
+                              {sub}
+                            </span>
+                            <span className="text-[10px] text-gray-400">
+                              {matchingTeachers.length} class option(s)
+                            </span>
+                          </div>
+
+                          {matchingTeachers.length === 0 ? (
+                            <div className="text-[11px] text-gray-400 italic py-1">
+                              Faculty assignment for this subject is being finalized by admin. Your request will be queued.
+                            </div>
+                          ) : (
+                            <div className="space-y-1.5">
+                              {matchingTeachers.map((t, idx) => {
+                                const isChosen =
+                                  subjectTeacherMap[sub]?.facultyId === t.facultyId;
+                                return (
+                                  <label
+                                    key={idx}
+                                    className={`flex items-center justify-between p-2 rounded-lg border text-xs cursor-pointer transition-all ${
+                                      isChosen
+                                        ? "bg-indigo-50/70 border-indigo-300 text-indigo-950 font-semibold"
+                                        : "border-gray-100 hover:bg-gray-50 text-gray-700"
+                                    }`}
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <input
+                                        type="radio"
+                                        name={`teacher_${sub}`}
+                                        checked={isChosen}
+                                        onChange={() => handleSelectTeacherForSubject(sub, t)}
+                                        className="text-gray-900 focus:ring-gray-900"
+                                      />
+                                      <div>
+                                        <p className="text-xs font-bold text-gray-900">
+                                          {t.facultyName}
+                                        </p>
+                                        <p className="text-[10px] text-gray-500 flex items-center gap-2 mt-0.5">
+                                          <span className="flex items-center gap-0.5">
+                                            <School size={10} /> Class: {t.className}
+                                          </span>
+                                          <span className="flex items-center gap-0.5">
+                                            <Clock size={10} /> {t.time}
+                                          </span>
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </label>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-            </div>
+            )}
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gray-900 text-white text-sm font-medium py-2.5 rounded-lg hover:bg-gray-800 active:bg-gray-950 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2"
+              className="w-full py-3 px-4 bg-gray-950 hover:bg-gray-800 text-white text-sm font-semibold rounded-xl transition-all duration-200 disabled:opacity-50 shadow-md hover:shadow-lg"
             >
-              {loading ? (
-                <>
-                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Creating account...
-                </>
-              ) : (
-                "Create account"
-              )}
+              {loading ? "Submitting Application…" : "Register & Submit Class Requests"}
             </button>
           </form>
 
-          <p className="mt-6 text-sm text-gray-500 text-center">
+          <div className="text-center text-xs text-gray-500">
             Already have an account?{" "}
-            <Link to="/login" className="text-gray-900 font-medium hover:underline underline-offset-2">
+            <Link to="/login" className="font-semibold text-gray-900 hover:underline">
               Sign in
             </Link>
-          </p>
-          <p className="mt-2 text-xs text-gray-400 text-center">
-            Registering as a teacher?{" "}
-            <Link to="/signup-teacher" className="text-gray-600 font-medium hover:underline underline-offset-2">
-              Use the teacher registration form
+            <span className="mx-2">·</span>
+            <Link to="/signup-teacher" className="font-semibold text-gray-900 hover:underline">
+              Register as Teacher
             </Link>
-          </p>
+          </div>
         </div>
       </div>
     </div>

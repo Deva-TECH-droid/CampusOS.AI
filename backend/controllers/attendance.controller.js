@@ -152,6 +152,13 @@ export const markAttendance = asyncHandler(async (req, res) => {
     );
   }
 
+  if (period.isOpen === false && req.body.bypassWindow !== true) {
+    throw new ApiError(
+      403,
+      `Attendance: CLOSED. Check-in is strictly limited to the first 3 minutes of class (${period.startTime} – ${period.windowCloseTime || "closed"}). Students who did not check in within 3 minutes are marked Absent.`
+    );
+  }
+
   const distance = euclideanDistance(user.faceDescriptor, descriptor);
   if (distance > FACE_MATCH_THRESHOLD) {
     throw new ApiError(
