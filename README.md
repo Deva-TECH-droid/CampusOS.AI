@@ -24,9 +24,7 @@ CampusOS is designed to provide students, faculty, clubs, and administrators wit
 
 ![CampusOS Dashboard](screenshorts/dashboard.png)
 
-### Classroom
 
-![CampusOS Classroom](screenshorts/classroom.png)
 
 ### Clubs
 
@@ -35,17 +33,11 @@ CampusOS is designed to provide students, faculty, clubs, and administrators wit
 
 ![CampusOS Classroom](screenshorts/alumni.png)
 
-### Clubs
-
-![CampusOS Clubs](screenshorts/clubs.png)
 
 ### Events
 
 ![CampusOS Events](screenshorts/events.png)
 
-### Discussions
-
-![CampusOS Discussions](screenshorts/discussions.png)
 
 ### Placement Portal
 
