@@ -25,10 +25,10 @@ CampusOS is designed to provide students, faculty, clubs, and administrators wit
 ![CampusOS Dashboard](screenshorts/dashboard.png)
 
 
-
 ### Clubs
 
-![CampusOS Clubs](screenshorrts/clubs.png)
+![CampusOS Clubs](screenshorts/clubs.png)
+
 ### Alumni
 
 ![CampusOS Classroom](screenshorts/alumni.png)
