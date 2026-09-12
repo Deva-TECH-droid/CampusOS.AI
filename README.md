@@ -14,6 +14,12 @@ CampusOS is designed to provide students, faculty, clubs, and administrators wit
 
 ## 📸 Screenshots
 
+## 📸 Quick View
+
+### Welcome
+
+![CampusOS Discussions](screenshorts/welcome.png)
+
 ### Dashboard
 
 ![CampusOS Dashboard](screenshorts/dashboard.png)
@@ -25,6 +31,13 @@ CampusOS is designed to provide students, faculty, clubs, and administrators wit
 ### Clubs
 
 ![CampusOS Clubs](screenshorrts/clubs.png)
+### Alumni
+
+![CampusOS Classroom](screenshorts/alumni.png)
+
+### Clubs
+
+![CampusOS Clubs](screenshorts/clubs.png)
 
 ### Events
 
@@ -177,6 +190,9 @@ Administrators can manage and moderate different areas of CampusOS.
 
 ### Features
 
+
+### Features
+
 * Manage clubs
 * Manage placement drives
 * Manage events
@@ -188,6 +204,9 @@ Administrators can manage and moderate different areas of CampusOS.
 ---
 
 # ☁️ File Upload System
+
+CampusOS uses cloud-based file storage for managing application media.
+
 
 CampusOS uses cloud-based file storage for managing application media.
 
@@ -228,6 +247,18 @@ CampusOS uses cloud-based file storage for managing application media.
 
 ## Development Tools
 
+
+* Node.js
+* Express.js
+* MongoDB
+* Mongoose
+* JWT
+* bcrypt
+* Multer
+* Cloudinary
+
+## Development Tools
+
 * Git
 * GitHub
 * VS Code
@@ -236,6 +267,39 @@ CampusOS uses cloud-based file storage for managing application media.
 ---
 
 # 🏗️ Project Architecture
+
+CampusOS follows a layered backend architecture to maintain separation of concerns and improve scalability.
+
+```text
+                    Client
+                      │
+                      ▼
+                 React Frontend
+                      │
+                      │ HTTP / REST API
+                      ▼
+                Express.js Server
+                      │
+             ┌────────┴────────┐
+             ▼                 ▼
+          Routes          Middleware
+             │                 │
+             └────────┬────────┘
+                      ▼
+                 Controllers
+                      │
+                      ▼
+                   Services
+                      │
+                      ▼
+                 Mongoose Models
+                      │
+                      ▼
+                   MongoDB
+```
+
+Authentication, authorization, validation, error handling, and other common operations are handled through reusable middleware.
+
 
 CampusOS follows a layered backend architecture to maintain separation of concerns and improve scalability.
 
@@ -361,6 +425,19 @@ JWT_REFRESH_EXPIRY=7d
 
 INTERNAL_CHATBOT_SECRET=your_long_random_chatbot_secret
 
+
+CLIENT_URL=http://localhost:5173
+
+PORT=5000
+
+JWT_ACCESS_SECRET=your_long_random_access_secret
+JWT_REFRESH_SECRET=your_long_random_refresh_secret
+
+JWT_ACCESS_EXPIRY=15m
+JWT_REFRESH_EXPIRY=7d
+
+INTERNAL_CHATBOT_SECRET=your_long_random_chatbot_secret
+
 ADMIN_EMAIL=adminmail@gmail.com
 ADMIN_PASSWORD=your_admin_password
 ADMIN_FIRST_NAME=your_first_name
@@ -426,6 +503,9 @@ The application requires environment variables for database connectivity, authen
 
 ---
 
+
+---
+
 # 🔄 Application Flow
 
 ```text
@@ -459,6 +539,9 @@ MongoDB
 ---
 
 # 🔮 Upcoming Features
+
+The following features are planned for future releases:
+
 
 The following features are planned for future releases:
 
@@ -515,6 +598,7 @@ If you find a bug or have a feature suggestion, feel free to open an issue in th
 # 📄 License
 
 This project is licensed under the **MIT License**.
+Distributed under the MIT License. See `LICENSE` for more information.
 
 ---
 
