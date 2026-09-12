@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import Navbar from './Navbar'
 import Footer from './Footer'
+import CampusChatbot from '../chatbot/CampusChatbot'
 
 const Layout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true)
@@ -17,6 +18,7 @@ const Layout = () => {
         </main>
         <Footer />
       </div>
+      <CampusChatbot />
     </div>
   )
 }

@@ -78,6 +78,10 @@ import FacultyManagement from "./pages/admin/FacultyManagement.jsx";
 import TestApproval from "./pages/admin/TestApproval.jsx";
 import AlumniManagement from "./pages/admin/AlumniManagement.jsx";
 import ClassroomManagement from "./pages/admin/ClassroomManagement.jsx";
+import FeedbackAdmin from "./pages/admin/FeedbackAdmin.jsx";
+
+// Faculty timetable
+import FacultyTimetable from "./pages/faculty/FacultyTimetable.jsx";
 
 // Profile
 import Profile from "./pages/profile/Profile";
@@ -91,12 +95,13 @@ const adminTabs = [
   { label: "Clubs", path: "/admin", end: true },
   { label: "Drives", path: "/admin/drives", end: false },
   { label: "Moderation", path: "/admin/moderation", end: false },
-    { label: "Notices", path: "/notices", end: false },
+  { label: "Notices", path: "/notices", end: false },
   { label: "Classrooms", path: "/admin/classrooms", end: false },
   { label: "Attendance", path: "/admin/attendance", end: false },
   { label: "Faculty", path: "/admin/faculty", end: false },
   { label: "Tests", path: "/admin/tests", end: false },
   { label: "Alumni", path: "/admin/alumni", end: false },
+  { label: "Feedback", path: "/admin/feedback", end: false },
 ];
 
 function App() {
@@ -258,6 +263,14 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/faculty/timetable"
+            element={
+              <ProtectedRoute allowedRoles={["faculty"]}>
+                <FacultyTimetable />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Student exams */}
           <Route path="/exams" element={<StudentExams />} />
@@ -296,11 +309,12 @@ function App() {
             <Route index element={<AdminPanel />} />
             <Route path="drives" element={<ManageDrives />} />
             <Route path="moderation" element={<ModerationQueue />} />
-                       <Route path="attendance" element={<AttendanceAdmin />} />
+            <Route path="attendance" element={<AttendanceAdmin />} />
             <Route path="classrooms" element={<ClassroomManagement />} />
             <Route path="faculty" element={<FacultyManagement />} />
             <Route path="tests" element={<TestApproval />} />
             <Route path="alumni" element={<AlumniManagement />} />
+            <Route path="feedback" element={<FeedbackAdmin />} />
           </Route>
 
           {/* Profile — no tabs */}

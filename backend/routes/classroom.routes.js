@@ -9,10 +9,14 @@ import {
   deletDeadline,
   adminListAllClassrooms,
   adminCreateClassroom,
+  adminUpdateClassroom,
   adminDeleteClassroom,
+  adminGetClassroomStudents,
   adminAddPeriod,
+  adminUpdatePeriod,
   adminRemovePeriod,
 } from "../controllers/classroom.controller.js";
+
 const classRoomRouter = express.Router();
 
 classRoomRouter.get("/", authMiddleware, getClassroom);
@@ -34,17 +38,35 @@ classRoomRouter.post(
   roleMiddleware("superadmin"),
   adminCreateClassroom
 );
+classRoomRouter.put(
+  "/admin/:id",
+  authMiddleware,
+  roleMiddleware("superadmin"),
+  adminUpdateClassroom
+);
 classRoomRouter.delete(
   "/admin/:id",
   authMiddleware,
   roleMiddleware("superadmin"),
   adminDeleteClassroom
 );
+classRoomRouter.get(
+  "/admin/:id/students",
+  authMiddleware,
+  roleMiddleware("superadmin"),
+  adminGetClassroomStudents
+);
 classRoomRouter.post(
   "/admin/:id/periods",
   authMiddleware,
   roleMiddleware("superadmin"),
   adminAddPeriod
+);
+classRoomRouter.put(
+  "/admin/:id/periods/:day/:index",
+  authMiddleware,
+  roleMiddleware("superadmin"),
+  adminUpdatePeriod
 );
 classRoomRouter.delete(
   "/admin/:id/periods/:day/:index",

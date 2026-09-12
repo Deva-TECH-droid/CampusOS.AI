@@ -13,6 +13,7 @@ import {
   getProfileData
 } from "../services/auth.service.js";
 import User from "../models/User.js";
+import Classroom from "../models/Classroom.js";
 
 export const signup = asyncHandler(async (req, res) => {
   const user = await registerUser(req.body);
@@ -48,22 +49,59 @@ export const signupTeacher = asyncHandler(async (req, res) => {
 });
 
 // ── GET /api/auth/teachers-directory ──────────────────────────────────
-// Public: lists approved teachers and the subjects they're actually
-// wired to teach, so a student signing up can pick "Ram Sir — Python".
+// Public: lists approved teachers, subjects, classes, and timings
 export const getTeachersDirectory = asyncHandler(async (req, res) => {
   const teachers = await User.find({ role: "faculty", status: "approved" })
-    .select("firstName lastName facultyAssignments")
-    .populate("facultyAssignments.classroom", "className")
+    .select("firstName lastName department facultyAssignments requestedSubjects")
+    .populate("facultyAssignments.classroom", "className branch section timetable")
     .lean();
 
-  const directory = teachers.flatMap((t) =>
-    (t.facultyAssignments || []).map((a) => ({
-      facultyId: t._id,
-      facultyName: `${t.firstName} ${t.lastName}`,
-      subject: a.subject,
-      className: a.classroom?.className,
-    }))
-  );
+  const directory = [];
+
+  for (const t of teachers) {
+    const assignments = t.facultyAssignments || [];
+    for (const a of assignments) {
+      const cls = a.classroom;
+      let time = "8:00 AM – 9:00 AM";
+
+      if (cls?.timetable) {
+        for (const periods of Object.values(cls.timetable)) {
+          const matchedPeriod = (periods || []).find(
+            (p) => p.subject === a.subject
+          );
+          if (matchedPeriod?.startTime && matchedPeriod?.endTime) {
+            time = `${matchedPeriod.startTime} – ${matchedPeriod.endTime}`;
+            break;
+          }
+        }
+      }
+
+      directory.push({
+        facultyId: t._id,
+        facultyName: `${t.firstName} ${t.lastName}`,
+        department: t.department || cls?.branch || "Computer Science",
+        subject: a.subject,
+        classroomId: cls?._id,
+        className: cls?.className || "Classroom",
+        time,
+      });
+    }
+
+    // Also include requestedSubjects if no assignments yet so new teachers can be requested
+    if (assignments.length === 0 && t.requestedSubjects?.length > 0) {
+      t.requestedSubjects.forEach((sub) => {
+        directory.push({
+          facultyId: t._id,
+          facultyName: `${t.firstName} ${t.lastName}`,
+          department: t.department || "Computer Science",
+          subject: sub,
+          classroomId: null,
+          className: "New Section",
+          time: "Schedule TBA",
+        });
+      });
+    }
+  }
 
   sendResponse(res, 200, "Teachers fetched.", { directory });
 });
