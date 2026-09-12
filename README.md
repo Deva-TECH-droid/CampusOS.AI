@@ -12,8 +12,6 @@ CampusOS is designed to provide students, faculty, clubs, and administrators wit
 
 ---
 
-## 📸 Screenshots
-
 ## 📸 Quick View
 
 ### Welcome
@@ -23,6 +21,10 @@ CampusOS is designed to provide students, faculty, clubs, and administrators wit
 ### Dashboard
 
 ![CampusOS Dashboard](screenshorts/dashboard.png)
+
+### ChatBot (n8n)
+
+![CampusOS Dashboard](screenshorts/n8nchatbot.webp)
 
 
 ### Clubs
