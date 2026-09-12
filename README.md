@@ -12,7 +12,7 @@ CampusOS is designed to provide students, faculty, clubs, and administrators wit
 
 ---
 
-## 📸 Screenshots
+## 📸 Quick View
 
 ### Welcome
 
