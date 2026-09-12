@@ -16,31 +16,31 @@ CampusOS is designed to provide students, faculty, clubs, and administrators wit
 
 ### Dashboard
 
-![CampusOS Dashboard](screenshots/dashboard.png)
+![CampusOS Dashboard](screenshorts/dashboard.png)
 
 ### Classroom
 
-![CampusOS Classroom](screenshots/classroom.png)
+![CampusOS Classroom](screenshorts/classroom.png)
 
 ### Clubs
 
-![CampusOS Clubs](screenshots/clubs.png)
+![CampusOS Clubs](screenshorrts/clubs.png)
 
 ### Events
 
-![CampusOS Events](screenshots/events.png)
+![CampusOS Events](screenshorts/events.png)
 
 ### Discussions
 
-![CampusOS Discussions](screenshots/discussions.png)
+![CampusOS Discussions](screenshorts/discussions.png)
 
 ### Placement Portal
 
-![CampusOS Placement Portal](screenshots/placement.png)
+![CampusOS Placement Portal](screenshorts/placement.png)
 
 ### Admin Panel
 
-![CampusOS Admin Panel](screenshots/admin.png)
+![CampusOS Admin Panel](screenshorts/admin.png)
 
 ---
 
