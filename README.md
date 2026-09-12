@@ -515,7 +515,7 @@ If you find a bug or have a feature suggestion, feel free to open an issue in th
 
 # 📄 License
 
-This project is licensed under the **MIT License**.
+Distributed under the MIT License. See `LICENSE` for more information.
 
 ---
 
