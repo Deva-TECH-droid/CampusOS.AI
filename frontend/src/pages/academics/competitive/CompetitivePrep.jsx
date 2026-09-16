@@ -9,6 +9,7 @@ import {
   SiYoutube, SiGithub, SiLeetcode, SiGeeksforgeeks 
 } from "react-icons/si"
 import useAuth from "../../../hooks/useAuth"
+import { listResources, submitResource } from "../../../api/competitive.api"
 
 // ─── API calls ────────────────────────────────────────────────
 // GET /api/competitive?category= → list resources by category
@@ -104,6 +105,8 @@ const SubmitModal = ({ activeCategory, onClose, onSubmit }) => {
     type: "roadmap", platform: ""
   })
   const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState("")
+  const [success, setSuccess] = useState(false)
 
   const set = (field) => (e) => setForm(prev => ({ ...prev, [field]: e.target.value }))
 
@@ -111,12 +114,14 @@ const SubmitModal = ({ activeCategory, onClose, onSubmit }) => {
     e.preventDefault()
     if (!form.title.trim() || !form.url.trim()) return
     setSubmitting(true)
+    setError("")
     try {
-      // TODO: await submitCompetitiveResource(form)
+      await submitResource(form)
+      setSuccess(true)
       onSubmit?.()
-      onClose()
+      setTimeout(() => onClose(), 1200)
     } catch (err) {
-      console.error(err)
+      setError(err?.response?.data?.message || "Couldn't submit resource.")
     } finally {
       setSubmitting(false)
     }
@@ -130,6 +135,16 @@ const SubmitModal = ({ activeCategory, onClose, onSubmit }) => {
           <button onClick={onClose} className="text-gray-400 hover:text-gray-700"><LuX size={16} /></button>
         </div>
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
+          {success ? (
+            <p className="text-sm text-green-600 text-center py-6">
+              Submitted! It'll appear once an admin reviews it.
+            </p>
+          ) : (
+          <>
+          <p className="text-xs text-gray-400 -mt-1">
+            Submitted resources are reviewed by an admin before they appear publicly.
+          </p>
+          {error && <p className="text-xs text-red-500">{error}</p>}
           <div>
             <label className="text-xs font-medium text-gray-700 block mb-1.5">Title <span className="text-red-400">*</span></label>
             <input type="text" placeholder="e.g. Striver's A2Z DSA Sheet" value={form.title} onChange={set("title")}
@@ -174,6 +189,8 @@ const SubmitModal = ({ activeCategory, onClose, onSubmit }) => {
               {submitting ? "Submitting..." : "Submit Resource"}
             </button>
           </div>
+          </>
+          )}
         </form>
       </div>
     </div>
@@ -192,8 +209,8 @@ const CompetitivePrep = () => {
     const fetchResources = async () => {
       setLoading(true)
       try {
-        // TODO: const res = await axios.get(`/api/competitive?category=${activeCategory}`)
-        // setResources(res.data.data)
+        const res = await listResources(activeCategory)
+        setResources(res.data?.data?.resources || [])
       } catch (err) {
         console.error(err)
       } finally {
@@ -217,7 +234,11 @@ const CompetitivePrep = () => {
         <SubmitModal
           activeCategory={activeCategory}
           onClose={() => setShowModal(false)}
-          onSubmit={() => {/* TODO: refetch */}}
+          onSubmit={() => {
+            listResources(activeCategory).then((res) =>
+              setResources(res.data?.data?.resources || []),
+            )
+          }}
         />
       )}
 

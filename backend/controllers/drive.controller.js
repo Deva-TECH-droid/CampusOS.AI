@@ -5,24 +5,9 @@ import Application from "../models/Application.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import sendResponse from "../utils/sendResponse.js";
 import Notice from "../models/Notice.js";
+import { checkEligibility } from "../services/eligibility.service.js";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
-
-const checkEligibility = (drive, user) => {
-  const reasons = [];
-  if (drive.minCGPA > 0 && user.cgpa < drive.minCGPA)
-    reasons.push(`Min CGPA ${drive.minCGPA} required (yours: ${user.cgpa})`);
-  if (
-    drive.eligibleBranches?.length > 0 &&
-    !drive.eligibleBranches.includes(user.branch)
-  )
-    reasons.push(`Open to ${drive.eligibleBranches.join(", ")} only`);
-  if (drive.minYear && user.year < drive.minYear)
-    reasons.push(`Min year ${drive.minYear} required`);
-  if (drive.maxYear && user.year > drive.maxYear)
-    reasons.push(`Open to year ${drive.maxYear} and below`);
-  return { eligible: reasons.length === 0, reasons };
-};
 
 // ─── GET /api/drives  (list + filters + search + pagination) ──────────────────
 export const getDrives = asyncHandler(async (req, res) => {

@@ -13,6 +13,7 @@ import {
   Pencil,
   Trash2,
   MoreHorizontal,
+  School,
 } from "lucide-react";
 import useAuth from "../../../hooks/useAuth";
 import {
@@ -287,8 +288,13 @@ const Classroom = () => {
   const [selectedDay, setSelectedDay] = useState(getCurrentDay());
   const [isClassRep,setIsClassRep]=useState(false);
 
+  const isUnassigned = !classroomId || classroomId === "unassigned";
+
   useEffect(() => {
-    if (!user?._id) return;
+    if (!user?._id || isUnassigned) {
+      setLoading(false);
+      return;
+    }
     const fetchData = async () => {
       try {
         setLoading(true);
@@ -306,13 +312,30 @@ const Classroom = () => {
       }
     };
     fetchData();
-  }, [user?._id, classroomId]);
+  }, [user?._id, classroomId, isUnassigned]);
 
   const handleDeleteDeadline = (id) => {
     setDeadlines((prev) => prev.filter((d) => d._id !== id));
   };
 
   if (loading) return <Skeleton />;
+
+  if (isUnassigned) {
+    return (
+      <div className="max-w-3xl mx-auto">
+        <div className="bg-white border border-gray-100 rounded-xl p-10 text-center">
+          <School size={26} className="text-gray-300 mx-auto mb-2" />
+          <h2 className="text-sm font-semibold text-gray-900 mb-1">
+            No classroom assigned yet
+          </h2>
+          <p className="text-xs text-gray-500">
+            This account isn't linked to a classroom, so there's nothing to
+            show here. Contact your administrator if this isn't expected.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const todayPeriods = classroom?.timetable?.[selectedDay] || [];
   const subjects = [
