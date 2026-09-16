@@ -2,6 +2,7 @@ import Application from "../models/Application.js";
 import Drive from "../models/Drive.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import sendResponse from "../utils/sendResponse.js";
+import { checkEligibility } from "../services/eligibility.service.js";
 
 // ─── POST /api/drives/:driveId/apply ──────────────────────────────────────────
 export const applyToDrive = asyncHandler(async (req, res) => {
@@ -34,33 +35,7 @@ export const applyToDrive = asyncHandler(async (req, res) => {
   }
 
   // 4. Complete Server-Side Eligibility verification mapping against User attributes
-  const reasons = [];
-
-  if (drive.minCGPA > 0 && user.cgpa < drive.minCGPA) {
-    reasons.push(`Min CGPA ${drive.minCGPA} required (yours: ${user.cgpa})`);
-  }
-
-  if (
-    drive.eligibleBranches?.length > 0 &&
-    !drive.eligibleBranches.includes(user.branch)
-  ) {
-    reasons.push(`Open to ${drive.eligibleBranches.join(", ")} only`);
-  }
-
-  // Added: Validate current user year against minYear and maxYear schema limits
-  if (drive.minYear && user.year < drive.minYear) {
-    reasons.push(`Min year ${drive.minYear} required`);
-  }
-  if (drive.maxYear && user.year > drive.maxYear) {
-    reasons.push(`Open to year ${drive.maxYear} and below`);
-  }
-
-  // Added: Enforce backlog constraints matching driveSchema validation rules
-  if (drive.maxBacklogs !== undefined && user.backlogs > drive.maxBacklogs) {
-    reasons.push(
-      `Maximum of ${drive.maxBacklogs} backlogs allowed (yours: ${user.backlogs})`,
-    );
-  }
+  const { reasons } = checkEligibility(drive, user);
 
   // If any criteria validations fail, abort and return standard payload mapping
   if (reasons.length > 0) {
